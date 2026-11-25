@@ -1,0 +1,89 @@
+import { linksParaExibir } from "@/lib/leads/links-de-contato";
+import type { Lead } from "@/lib/types/leads";
+
+type DadosDoContato = Pick<
+  Lead,
+  "contact_phone" | "contact_email" | "contact_links" | "contact_has_avatar"
+>;
+
+/** A linha de `contacts` como o quadro a lê — as colunas que esta regra usa. */
+export interface LinhaDoContatoNoQuadro {
+  id: string;
+  phone_number: string | null;
+  email: string | null;
+  custom_fields: Record<string, unknown> | null;
+  is_anonymized: boolean | null;
+  /** Só se pergunta se EXISTE: o caminho do arquivo não sai no payload. */
+  avatar_storage_path?: string | null;
+}
+
+/**
+ * Anexa telefone, e-mail e links do CONTATO aos leads do quadro — o que o card
+ * do funil mostra sem abrir o dossiê.
+ *
+ * PURA de propósito: recebe as linhas de contato que a etapa dos marcadores já
+ * leu (`withMarcadoresDoContato`, na rota do quadro) em vez de consultar o
+ * banco de novo. Uma leitura de `contacts` por quadro, não duas — e a regra
+ * fica testável sem banco, já que um `route.ts` do Next só pode exportar os
+ * métodos HTTP.
+ *
+ * Contato anonimizado (LGPD) é PULADO, mesmo que a linha ainda carregue algum
+ * valor: o quadro é a superfície com mais exposição do produto, e "apagado a
+ * pedido do titular" não pode reaparecer num card.
+ *
+ * Vazio não vira campo: só se escreve o que existe, para o payload não engordar
+ * com três chaves nulas em todo card. Negócio sem contato (ou contato que não
+ * veio na leitura) passa intacto — o card dele não pode sumir.
+ */
+export function anexarDadosDoContato(leads: Lead[], contatos: LinhaDoContatoNoQuadro[]): Lead[] {
+  const porContato = new Map<string, DadosDoContato>();
+  for (const contato of contatos) {
+    if (contato.is_anonymized) continue;
+    const links = linksParaExibir(contato.custom_fields);
+    const dados: DadosDoContato = {
+      ...(contato.phone_number ? { contact_phone: contato.phone_number } : {}),
+      ...(contato.email ? { contact_email: contato.email } : {}),
+      ...(links.length > 0 ? { contact_links: links } : {}),
+      ...(contato.avatar_storage_path ? { contact_has_avatar: true as const } : {}),
+    };
+    if (Object.keys(dados).length > 0) porContato.set(contato.id, dados);
+  }
+  if (porContato.size === 0) return leads;
+
+  return leads.map((lead) => {
+    const dados = lead.contact_id ? porContato.get(lead.contact_id) : undefined;
+    return dados ? { ...lead, ...dados } : lead;
+  });
+}
+
+/** Nome do contato como o quadro o lê, só para o filtro de texto livre do módulo sem `contatos`. */
+export interface NomeDoContatoNoQuadro {
+  id: string;
+  name?: string | null;
+  display_name?: string | null;
+  is_anonymized?: boolean | null;
+}
+
+/**
+ * Anexa o NOME do contato ao lead (`contact_name`, `contact_display_name`). Só a rota do quadro chama, e
+ * só quando quem chama é módulo sem `contatos`, numa leitura à parte: o `redigirContatoParaModulo` coleta
+ * esses campos para filtrar o título e depois os anula. Sessão e módulo com `contatos` não passam aqui.
+ * O nome da agenda do celular NÃO entra: só as telas da equipe o leem
+ * (`tests/unit/nome-da-agenda-nunca-vai-ao-cliente.test.ts`).
+ */
+export function anexarNomeDoContato(leads: Lead[], contatos: NomeDoContatoNoQuadro[]): Lead[] {
+  const porContato = new Map<string, Partial<Lead>>();
+  for (const c of contatos) {
+    if (c.is_anonymized) continue;
+    const dados: Partial<Lead> = {
+      ...(c.name ? { contact_name: c.name } : {}),
+      ...(c.display_name ? { contact_display_name: c.display_name } : {}),
+    };
+    if (Object.keys(dados).length > 0) porContato.set(c.id, dados);
+  }
+  if (porContato.size === 0) return leads;
+  return leads.map((lead) => {
+    const dados = lead.contact_id ? porContato.get(lead.contact_id) : undefined;
+    return dados ? { ...lead, ...dados } : lead;
+  });
+}

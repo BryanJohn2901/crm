@@ -1,0 +1,772 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Extensões declarativas v1",
+    "subtitle": "Perfil declarativo com versões: instalar, atualizar, desfazer e remover",
+    "output": "extensoes-declarativas.html",
+    "quality_profile": "standard"
+  },
+  "lanes": [
+    {
+      "id": "human",
+      "label": "Pessoa"
+    },
+    {
+      "id": "app",
+      "label": "Aplicação"
+    },
+    {
+      "id": "db",
+      "label": "Banco local"
+    },
+    {
+      "id": "external",
+      "label": "Catálogo de ensaio"
+    },
+    {
+      "id": "module",
+      "label": "Módulo conectado (serviço externo)"
+    }
+  ],
+  "mainPath": [
+    "operator",
+    "manager",
+    "guards",
+    "trust",
+    "operations",
+    "download",
+    "artifact",
+    "binding",
+    "hub",
+    "capability",
+    "tasks"
+  ],
+  "nodes": [
+    {
+      "id": "operator",
+      "lane": "human",
+      "col": 0,
+      "type": "ui",
+      "label": "Dono admite catálogo revisado"
+    },
+    {
+      "id": "catalog",
+      "lane": "external",
+      "col": 1,
+      "type": "database",
+      "label": "CLI/HTTP de ensaio · SQLite próprio"
+    },
+    {
+      "id": "manager",
+      "lane": "human",
+      "col": 2,
+      "type": "ui",
+      "label": "Gestão /app/extensions"
+    },
+    {
+      "id": "guards",
+      "lane": "app",
+      "col": 3,
+      "type": "service",
+      "label": "Papel, MFA, suporte e org confiável"
+    },
+    {
+      "id": "trust",
+      "lane": "db",
+      "col": 4,
+      "type": "database",
+      "label": "extension_catalogs · origem/revisão/digest"
+    },
+    {
+      "id": "download",
+      "lane": "app",
+      "col": 5,
+      "type": "service",
+      "label": "Download limitado · DNS ligado à conexão"
+    },
+    {
+      "id": "operations",
+      "lane": "db",
+      "col": 6,
+      "type": "database",
+      "label": "extension_operations · preparar/concluir/cancelar"
+    },
+    {
+      "id": "artifact",
+      "lane": "db",
+      "col": 7,
+      "type": "database",
+      "label": "Documento original + hash · instalação imutável"
+    },
+    {
+      "id": "binding",
+      "lane": "db",
+      "col": 8,
+      "type": "database",
+      "label": "organization_extensions · estado/config/revisão"
+    },
+    {
+      "id": "hub",
+      "lane": "human",
+      "col": 9,
+      "type": "ui",
+      "label": "Hub CRM e guia /app/extensions/[id]"
+    },
+    {
+      "id": "capability",
+      "lane": "app",
+      "col": 10,
+      "type": "service",
+      "label": "tasks.open · estado e revisão atuais"
+    },
+    {
+      "id": "tasks",
+      "lane": "human",
+      "col": 11,
+      "type": "ui",
+      "label": "Tarefas do núcleo · autorização habitual"
+    },
+    {
+      "id": "audit",
+      "lane": "db",
+      "col": 12,
+      "type": "database",
+      "label": "api_audit_log · ações de extensão"
+    },
+    {
+      "id": "updater",
+      "lane": "app",
+      "col": 13,
+      "type": "service",
+      "label": "Atualizador do app · lock compartilhado"
+    },
+    {
+      "id": "audit_view",
+      "lane": "human",
+      "col": 14,
+      "type": "ui",
+      "label": "Auditoria existente /admin/audit"
+    },
+    {
+      "id": "revert",
+      "lane": "app",
+      "col": 15,
+      "type": "service",
+      "label": "Desfazer a última troca · sem download"
+    },
+    {
+      "id": "removal",
+      "lane": "app",
+      "col": 16,
+      "type": "service",
+      "label": "Remover da instalação · desliga vínculos ativos"
+    },
+    {
+      "id": "org_audit_view",
+      "lane": "human",
+      "col": 17,
+      "type": "ui",
+      "label": "Auditoria da organização /app/audit"
+    },
+    {
+      "id": "connected_profile",
+      "lane": "db",
+      "col": 5,
+      "type": "database",
+      "label": "Perfil connected · service_origin na entrada do catálogo"
+    },
+    {
+      "id": "switch",
+      "lane": "app",
+      "col": 18,
+      "type": "service",
+      "label": "Interruptor do módulo connected · liga e desliga sem desinstalar"
+    },
+    {
+      "id": "installation_flag",
+      "lane": "db",
+      "col": 18,
+      "type": "database",
+      "label": "extension_installations · disabled_at e disabled_by"
+    },
+    {
+      "id": "switch_ui",
+      "lane": "human",
+      "col": 18,
+      "type": "ui",
+      "label": "Tela /app/extensions · Ligar ou Desligar no cartão"
+    },
+    {
+      "id": "installation_secret",
+      "lane": "db",
+      "col": 19,
+      "type": "database",
+      "label": "extension_installation_secrets · segredo cifrado, sem policy para cliente"
+    },
+    {
+      "id": "token_nonce",
+      "lane": "db",
+      "col": 20,
+      "type": "database",
+      "label": "extension_token_nonces · uso único da assinatura de busca"
+    },
+    {
+      "id": "module_token",
+      "lane": "db",
+      "col": 21,
+      "type": "database",
+      "label": "api_tokens · vaga do módulo, um token vivo por organização e instalação"
+    },
+    {
+      "id": "secret_route",
+      "lane": "app",
+      "col": 19,
+      "type": "service",
+      "label": "POST /api/v1/extensions/[id]/segredo · gira o segredo, mostrado uma vez"
+    },
+    {
+      "id": "token_route",
+      "lane": "app",
+      "col": 20,
+      "type": "service",
+      "label": "POST /api/v1/extensions/token · busca com assinatura HMAC, carimbo e nonce"
+    },
+    {
+      "id": "revoke_route",
+      "lane": "app",
+      "col": 21,
+      "type": "service",
+      "label": "POST /api/v1/settings/api-tokens/[id]/revoke · revoga o token do módulo"
+    },
+    {
+      "id": "module",
+      "lane": "module",
+      "col": 20,
+      "type": "service",
+      "label": "Módulo conectado · guarda o segredo e chama a busca"
+    },
+    {
+      "id": "tokens_ui",
+      "lane": "human",
+      "col": 21,
+      "type": "ui",
+      "label": "Tela de tokens · linha Módulo <slug>, sem copiar, com Revogar"
+    },
+    {
+      "id": "consent_ui",
+      "lane": "human",
+      "col": 22,
+      "type": "ui",
+      "label": "Cartão da extensão · caixas de consentimento por área, só o admin salva"
+    },
+    {
+      "id": "consent_route",
+      "lane": "app",
+      "col": 22,
+      "type": "service",
+      "label": "PUT /api/v1/extensions/[id]/consentimento · grava o consentimento com revisão esperada"
+    },
+    {
+      "id": "consent_db",
+      "lane": "db",
+      "col": 22,
+      "type": "database",
+      "label": "organization_extensions · áreas consentidas (fn_extensions_set_consent)"
+    },
+    {
+      "id": "authority_gate",
+      "lane": "app",
+      "col": 23,
+      "type": "service",
+      "label": "Portão de autoridade · declarado ∩ consentido, lido do banco a cada chamada"
+    },
+    {
+      "id": "context_route",
+      "lane": "app",
+      "col": 23,
+      "type": "service",
+      "label": "POST /api/v1/extensions/[id]/contexto · emite o JWT de contexto da pessoa"
+    },
+    {
+      "id": "context_jwt",
+      "lane": "module",
+      "col": 23,
+      "type": "service",
+      "label": "JWT de contexto (assinatura assimétrica) · a pessoa por quem a tela do módulo age"
+    },
+    {
+      "id": "module_frame",
+      "lane": "human",
+      "col": 24,
+      "type": "ui",
+      "label": "Quadro do módulo · iframe de outra origem com sandbox fechado, na rota /app/m/[modulo]"
+    },
+    {
+      "id": "module_bridge",
+      "lane": "app",
+      "col": 24,
+      "type": "service",
+      "label": "Ponte postMessage · 6 mensagens fechadas, origem e janela conferidas nos dois lados"
+    },
+    {
+      "id": "module_nav_group",
+      "lane": "human",
+      "col": 25,
+      "type": "ui",
+      "label": "Grupo Módulos no menu e item no Ctrl+K · gerado a partir dos módulos conectados ativos"
+    },
+    {
+      "id": "module_panel",
+      "lane": "human",
+      "col": 25,
+      "type": "ui",
+      "label": "Painel lateral do módulo · mesmo quadro, pedido pela Server Action moduloParaOPainel"
+    },
+    {
+      "id": "module_events_table",
+      "lane": "db",
+      "col": 26,
+      "type": "database",
+      "label": "extension_module_events · contato anonimizado, módulo desativado e organização suspensa; só identificadores, escritos por gatilho"
+    },
+    {
+      "id": "module_events_route",
+      "lane": "app",
+      "col": 27,
+      "type": "service",
+      "label": "GET /api/v1/extensions/events · leitura por cursor opaco, assinada com a mesma prova da busca de token"
+    },
+    {
+      "id": "module_events_cursor",
+      "lane": "db",
+      "col": 28,
+      "type": "database",
+      "label": "extension_module_cursors · último evento lido e quando, por organização e instalação; vira o atraso em /admin/extensoes"
+    }
+  ],
+  "edges": [
+    {
+      "from": "operator",
+      "to": "catalog",
+      "label": "revisar/publicar/exportar arquivo"
+    },
+    {
+      "from": "operator",
+      "to": "manager",
+      "label": "admitir arquivo por canal confiado"
+    },
+    {
+      "from": "manager",
+      "to": "guards",
+      "label": "pedir instalação ou configuração"
+    },
+    {
+      "from": "guards",
+      "to": "trust",
+      "label": "registrar admissão"
+    },
+    {
+      "from": "trust",
+      "to": "operations",
+      "label": "fixar identidade e revisão"
+    },
+    {
+      "from": "operations",
+      "to": "download",
+      "label": "preparar antes da rede"
+    },
+    {
+      "from": "catalog",
+      "to": "download",
+      "label": "servir bytes por digest"
+    },
+    {
+      "from": "download",
+      "to": "artifact",
+      "label": "validar e publicar na mesma transação do recibo"
+    },
+    {
+      "from": "artifact",
+      "to": "operations",
+      "label": "pós-condição e resultado durável"
+    },
+    {
+      "from": "guards",
+      "to": "binding",
+      "label": "CAS + limite agregado"
+    },
+    {
+      "from": "artifact",
+      "to": "binding",
+      "label": "versão compartilhada, ativação local"
+    },
+    {
+      "from": "binding",
+      "to": "hub",
+      "label": "conteúdo habilitado nesta organização"
+    },
+    {
+      "from": "artifact",
+      "to": "hub",
+      "label": "documento local sem consulta remota"
+    },
+    {
+      "from": "hub",
+      "to": "capability",
+      "label": "ação tipada e revisão"
+    },
+    {
+      "from": "capability",
+      "to": "binding",
+      "label": "revalidar disponibilidade"
+    },
+    {
+      "from": "capability",
+      "to": "tasks",
+      "label": "abrir destino conhecido"
+    },
+    {
+      "from": "tasks",
+      "to": "hub",
+      "label": "retornar pelo CRM"
+    },
+    {
+      "from": "guards",
+      "to": "audit",
+      "label": "ator e IDs sem conteúdo bruto"
+    },
+    {
+      "from": "audit",
+      "to": "audit_view",
+      "label": "ler pela API administrativa de auditoria"
+    },
+    {
+      "from": "operations",
+      "to": "manager",
+      "label": "reler/retomar/cancelar com motivo"
+    },
+    {
+      "from": "updater",
+      "to": "operations",
+      "label": "recusar conflito com preparação"
+    },
+    {
+      "from": "operations",
+      "to": "updater",
+      "label": "exclusão transacional da atualização pelo app"
+    },
+    {
+      "from": "operator",
+      "to": "audit_view",
+      "label": "consultar ações com acesso administrativo"
+    },
+    {
+      "from": "guards",
+      "to": "revert",
+      "label": "desfazer com a revisão exibida, só plataforma"
+    },
+    {
+      "from": "revert",
+      "to": "artifact",
+      "label": "trocar ponteiro vigente com o anterior"
+    },
+    {
+      "from": "revert",
+      "to": "operations",
+      "label": "recibo revert com de/para"
+    },
+    {
+      "from": "guards",
+      "to": "removal",
+      "label": "remover com a revisão exibida, só plataforma"
+    },
+    {
+      "from": "removal",
+      "to": "binding",
+      "label": "desligar vínculos ativos, marca e configuração preservada"
+    },
+    {
+      "from": "removal",
+      "to": "operations",
+      "label": "recibo removal com organizações desligadas"
+    },
+    {
+      "from": "removal",
+      "to": "audit",
+      "label": "extension.deactivated_by_removal por organização"
+    },
+    {
+      "from": "removal",
+      "to": "hub",
+      "label": "guia responde 410 removida"
+    },
+    {
+      "from": "revert",
+      "to": "audit",
+      "label": "extension.reverted na instância"
+    },
+    {
+      "from": "audit",
+      "to": "org_audit_view",
+      "label": "organização vê a própria desativação pela remoção (salvo resposta perdida)"
+    },
+    {
+      "from": "manager",
+      "to": "org_audit_view",
+      "label": "gerente da organização confere por que o guia saiu"
+    },
+    {
+      "from": "org_audit_view",
+      "to": "manager",
+      "label": "organização volta à gestão para reativar depois da reinstalação"
+    },
+    {
+      "from": "audit_view",
+      "to": "manager",
+      "label": "responsável volta à gestão para desfazer, remover ou reinstalar"
+    },
+    {
+      "from": "trust",
+      "to": "connected_profile",
+      "label": "admite entrada com service_origin (fn_extensions_admit_catalog)"
+    },
+    {
+      "from": "connected_profile",
+      "to": "artifact",
+      "label": "instala só com permissão de área (fn_extensions_finish_install)"
+    },
+    {
+      "from": "guards",
+      "to": "switch",
+      "label": "ligar ou desligar com a revisão exibida, só plataforma"
+    },
+    {
+      "from": "switch",
+      "to": "installation_flag",
+      "label": "grava disabled_at e sobe a revisão (fn_extensions_set_switch)"
+    },
+    {
+      "from": "switch",
+      "to": "audit",
+      "label": "extension.switched com operation_id e disabled, só quando aplica"
+    },
+    {
+      "from": "installation_flag",
+      "to": "switch_ui",
+      "label": "mostra Desligado nesta instalação, com a data"
+    },
+    {
+      "from": "switch_ui",
+      "to": "switch",
+      "label": "pede ligar ou desligar com a revisão que a tela viu"
+    },
+    {
+      "from": "switch_ui",
+      "to": "secret_route",
+      "label": "pede gerar ou girar o segredo (sessão de quem administra, requireSupportWrite)"
+    },
+    {
+      "from": "secret_route",
+      "to": "installation_secret",
+      "label": "grava o segredo cifrado com AI_CRED_AES_KEY (upsert)"
+    },
+    {
+      "from": "secret_route",
+      "to": "module_token",
+      "label": "revoga os tokens vivos da instalação, uma chamada por organização"
+    },
+    {
+      "from": "secret_route",
+      "to": "audit",
+      "label": "extension.secret_rotated, sem o valor do segredo"
+    },
+    {
+      "from": "module",
+      "to": "token_route",
+      "label": "envia X-Module-* com carimbo, nonce e assinatura HMAC"
+    },
+    {
+      "from": "installation_secret",
+      "to": "token_route",
+      "label": "entrega o segredo cifrado; a busca decifra só para conferir"
+    },
+    {
+      "from": "token_route",
+      "to": "token_nonce",
+      "label": "grava o nonce e apaga os nonces com mais de 10 min"
+    },
+    {
+      "from": "token_nonce",
+      "to": "token_route",
+      "label": "nonce repetido: recusa genérica, sem dizer o motivo"
+    },
+    {
+      "from": "token_route",
+      "to": "module_token",
+      "label": "troca o hash da vaga e fixa expires_at em 1 h (fn_extensions_module_token_rotate)"
+    },
+    {
+      "from": "token_route",
+      "to": "module",
+      "label": "devolve token e expires_at; o texto do token sai uma vez"
+    },
+    {
+      "from": "token_route",
+      "to": "audit",
+      "label": "extension.token_issued, ator módulo, sem o texto do token"
+    },
+    {
+      "from": "module_token",
+      "to": "tokens_ui",
+      "label": "lista como Módulo <slug>, sem botão de copiar"
+    },
+    {
+      "from": "tokens_ui",
+      "to": "revoke_route",
+      "label": "Revogar pede a rota de revogação"
+    },
+    {
+      "from": "revoke_route",
+      "to": "module_token",
+      "label": "revoga o token e desativa a ativação daquela organização na mesma transação"
+    },
+    {
+      "from": "consent_ui",
+      "to": "consent_route",
+      "label": "salvar pede a rota de consentimento"
+    },
+    {
+      "from": "consent_route",
+      "to": "consent_db",
+      "label": "grava só áreas que o pacote declarou"
+    },
+    {
+      "from": "consent_db",
+      "to": "authority_gate",
+      "label": "o portão lê o consentimento vigente"
+    },
+    {
+      "from": "module_token",
+      "to": "authority_gate",
+      "label": "o token do módulo chega ao portão com o modo da porta"
+    },
+    {
+      "from": "authority_gate",
+      "to": "module",
+      "label": "deixa passar ou recusa por área e modo"
+    },
+    {
+      "from": "context_route",
+      "to": "context_jwt",
+      "label": "emite o JWT com a pessoa e a organização"
+    },
+    {
+      "from": "context_jwt",
+      "to": "authority_gate",
+      "label": "o portão limita o papel ao menor entre token e pessoa"
+    },
+    {
+      "from": "authority_gate",
+      "to": "consent_ui",
+      "label": "a recusa por área aparece na tela com o motivo"
+    },
+    {
+      "from": "module_nav_group",
+      "to": "module_frame",
+      "label": "o item do menu ou do Ctrl+K abre a rota do módulo"
+    },
+    {
+      "from": "module_panel",
+      "to": "module_frame",
+      "label": "o painel desenha o mesmo quadro, sem caminho de segurança próprio"
+    },
+    {
+      "from": "module_frame",
+      "to": "module_bridge",
+      "label": "o quadro só fala com o módulo pela ponte"
+    },
+    {
+      "from": "module_bridge",
+      "to": "context_route",
+      "label": "module:request-jwt pede o JWT de contexto, no máximo um a cada 30 s"
+    },
+    {
+      "from": "context_jwt",
+      "to": "module_bridge",
+      "label": "o JWT volta ao módulo só por host:jwt, para a origem conferida"
+    },
+    {
+      "from": "module_bridge",
+      "to": "module_frame",
+      "label": "host:error e o aviso de serviço fora do ar aparecem para a pessoa"
+    },
+    {
+      "from": "installation_flag",
+      "to": "module_nav_group",
+      "label": "só módulo ativo, não removido e compatível entra no menu"
+    },
+    {
+      "from": "connected_profile",
+      "to": "module_panel",
+      "label": "o service_origin vem do catálogo e só sai pelo servidor, nunca pelo navegador"
+    },
+    {
+      "from": "module_frame",
+      "to": "module",
+      "label": "o iframe carrega /embed do serviço do módulo, em outra origem"
+    },
+    {
+      "from": "installation_flag",
+      "to": "module_events_table",
+      "label": "desligar ou remover o módulo grava um module_disabled por organização ainda ligada (gatilho, nunca HTTP)"
+    },
+    {
+      "from": "module_events_table",
+      "to": "module_events_route",
+      "label": "a rota lê só os eventos da organização assinada; module_disabled só do par certo"
+    },
+    {
+      "from": "module",
+      "to": "module_events_route",
+      "label": "o módulo busca os eventos com a assinatura X-Module-*, mesmo depois de o token ser revogado"
+    },
+    {
+      "from": "token_route",
+      "to": "module_events_route",
+      "label": "a prova (carimbo, segredo, assinatura, nonce) é a mesma, extraída para um só lugar"
+    },
+    {
+      "from": "module_events_route",
+      "to": "module",
+      "label": "devolve os eventos e um cursor opaco que liga organização, instalação e posição"
+    },
+    {
+      "from": "module_events_route",
+      "to": "module_events_cursor",
+      "label": "o cursor recebido reconhece o anterior; o cursor só avança"
+    },
+    {
+      "from": "module_events_cursor",
+      "to": "switch_ui",
+      "label": "/admin/extensoes mostra o último cursor, quando foi lido e o atraso, com o selo atrasado"
+    }
+  ],
+  "contracts": {
+    "status": "implementado nesta branch; instalação e recuperação provadas em tela no J25 (15/09/2026); atualizar, desfazer e remover provados no banco, com a jornada em tela J26; nada publicado",
+    "spec": "docs/specs/extensoes-declarativas-v1.md",
+    "no_links": [
+      "Catálogo não recebe contatos, conversas, tarefas ou identidade persistente da VPS.",
+      "Pacote não recebe cliente Supabase, ambiente, shell, JavaScript ou SQL.",
+      "tasks.open não lê nem escreve tarefas em nome da extensão.",
+      "Desativação preserva configuração e dados de domínio existentes.",
+      "Remover não reativa nem apaga a configuração de nenhuma organização; a plataforma não decide pela organização."
+    ],
+    "limits": [
+      "Admissão manual de catálogo não é TUF nem distribuição pública.",
+      "Coordenação cobre o atualizador pelo app, não comandos externos arbitrários.",
+      "Desfazer guarda um passo de histórico; versões mais antigas voltam pelo catálogo, se a revisão admitida ainda as listar.",
+      "Remoção é lógica: nenhuma linha é apagada, e reinstalar exige que cada organização ative de novo."
+    ]
+  }
+}
